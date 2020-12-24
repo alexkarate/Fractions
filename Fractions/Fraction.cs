@@ -158,7 +158,7 @@ namespace Fractions
         /// <param name="eps">Used to check if the current proper fraction equals to zero.</param>
         /// <param name="maxIterations">The maximum amount amount of iterations that the function checks before it decides <paramref name="value"/> is an irrational number.</param>
         /// <returns>The fraction that approximately equals the given value.</returns>
-        public static Fraction DoubleToFraction(double value, double eps = 0.0001, int maxIterations = 20)
+        public static Fraction DoubleToFraction(double value, double eps = 1e-5, int maxIterations = 20)
         {
             if (eps <= 0 || maxIterations <= 0)
                 throw new ArgumentException();
@@ -184,7 +184,7 @@ namespace Fractions
             i--;
             // if i equals -1 then the original value was a whole number
             if (i == -1)
-                return new Fraction((long)value);
+                return new Fraction(Convert.ToInt64(fullNumerators[0]) * sign);
             // These are the final results of the algorithm
             double finalDenominator = 1;
             double finalNumerator = 0;
@@ -194,7 +194,7 @@ namespace Fractions
                 double denominator;
                 // If we are in the first iteration, then we need to find the first denominator. fullNumerators[i + 1] should have the correct denimerator, or the approximation of it if the input was an irrational number
                 if (j == i)
-                    denominator = 1 / fractions[j];
+                    denominator =  Math.Round(1 / fractions[j]);
                 else  // Otherwise, we don't need to find the denominator, as it is equal to the previous numerator (which we already swapped in the last iteration)
                     denominator = finalDenominator;
                 // The current numerator equals to previous denominator (which we already swapped) plus the current denominator times the whole number of the jth mixed fraction
@@ -213,7 +213,16 @@ namespace Fractions
                     finalNumerator = numerator;
                 }
             }
-            return new Fraction(Convert.ToInt64(finalNumerator)* sign, Convert.ToInt64(finalDenominator));
+            Fraction f;
+            try
+            {
+                f = new Fraction(Convert.ToInt64(finalNumerator) * sign, Convert.ToInt64(finalDenominator));
+            }
+            catch (OverflowException e)
+            {
+                throw new ArgumentException("The given value was too large or epsilon was too small");
+            }
+            return f;
         }
         public override string ToString() 
         {
@@ -291,5 +300,43 @@ namespace Fractions
             return a - new Fraction(b);
         }
         public static Fraction operator -(double a, Fraction b) => -b + a;
+        public static bool operator ==(Fraction a, Fraction b)
+        {
+            if (a.Numerator != b.Numerator)
+                return false;
+            if (a.Denominator != b.Denominator && a.Numerator != 0)
+                return false;
+            return true;
+        }
+        public static bool operator !=(Fraction a, Fraction b) => !(a == b);
+        public static bool operator ==(Fraction a, long b) => a.Denominator == 1 && a.Numerator == b;
+        public static bool operator !=(Fraction a, long b) => !(a == b);
+        public static bool operator ==(Fraction a, double b) => a.Value == b;
+        public static bool operator !=(Fraction a, double b) => !(a == b);
+        public static bool operator ==(long a, Fraction b) => b == a;
+        public static bool operator !=(long a, Fraction b) => !(b == a);
+        public static bool operator ==(double a, Fraction b) => b == a;
+        public static bool operator !=(double a, Fraction b) => !(b == a);
+        public static bool operator >(Fraction a, Fraction b) => a.Value > b.Value;
+        public static bool operator <(Fraction a, Fraction b) => a.Value < b.Value;
+        public static bool operator >(Fraction a, long b) => a.Value > b;
+        public static bool operator <(Fraction a, long b) => a.Value < b;
+        public static bool operator >(Fraction a, double b) => a.Value > b;
+        public static bool operator <(Fraction a, double b) => a.Value < b;
+        public static bool operator >(long a, Fraction b) => a > b.Value;
+        public static bool operator <(long a, Fraction b) => a < b.Value;
+        public static bool operator >(double a, Fraction b) => a > b.Value;
+        public static bool operator <(double a, Fraction b) => a < b.Value;
+        public static bool operator >=(Fraction a, Fraction b) => !(a < b);
+        public static bool operator <=(Fraction a, Fraction b) => !(a > b);
+        public static bool operator >=(Fraction a, long b) => !(a < b);
+        public static bool operator <=(Fraction a, long b) => !(a > b);
+        public static bool operator >=(Fraction a, double b) => !(a < b);
+        public static bool operator <=(Fraction a, double b) => !(a > b);
+        public static bool operator >=(long a, Fraction b) => !(a < b);
+        public static bool operator <=(long a, Fraction b) => !(a > b);
+        public static bool operator >=(double a, Fraction b) => !(a < b);
+        public static bool operator <=(double a, Fraction b) => !(a > b);
+
     }
 }

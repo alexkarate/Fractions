@@ -94,7 +94,8 @@ namespace FractionTesting
         {
             OperationTest(100, 57, 92, 11);
             TestDoubleToFraction(1000, 1000, 0.0001, 15);
-            PIApproximationTest(0.01, 0.000001, 5, 20);
+            PIApproximationTest(0.01, 1e-6, 5, 20);
+            Console.WriteLine(Fraction.DoubleToFraction((double)99999 / 100000).ToString());
         }
     }
 }
